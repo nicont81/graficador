@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graficador de Funciones Lineales y Cuadráticas</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    body {
+        font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background-color: #f8fafc;
+    }
+
+    /* Estilo sutil para inputs numéricos */
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+        opacity: 1;
+    }
+
+    .canvas-shadow {
+        box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08),
+                    0 8px 10px -6px rgba(15, 23, 42, 0.04);
+    }
+</style>
+</head>
+<body class="text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Encabezado -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold text-slate-900 leading-tight">Graficador de funci&oacute;n lineal y cuadrática</h1>
+                    <p class="text-xs text-slate-500">Proyecto de representación estilo Matplotlib con HTML + CSS + JS que utiliza librería chart.js </p>
+                    <p class="text-xs text-slate-500">Vincula contenidos de Laboratorio Full Stack, Programación y Matemática.</p>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+                <button id="btnResetOriginal" type="button" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                    Ejemplo Original
+                </button>
+                <button id="btnAutoRange" type="button" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg>
+                    Auto-ajustar Ejes
+                </button>
+                <button id="btnDownload" type="button" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                    Descargar PNG
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenido Principal -->
+    <main class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 flex-1">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+            <!-- Panel Izquierdo: Controles de Coeficientes y Rango -->
+            <div class="lg:col-span-5 xl:col-span-4 space-y-5">
+
+                <!-- Tarjeta Función Lineal f(x) -->
+                <section class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3.5 h-3.5 rounded-full bg-[#0000FF] inline-block ring-4 ring-blue-100"></span>
+                            <h2 class="font-bold text-slate-900 text-sm uppercase tracking-wider">Función Lineal <span class="italic font-serif lowercase text-base">f(x)</span></h2>
+                        </div>
+                        <span id="previewLinearFormula" class="text-xs font-mono font-semibold px-2.5 py-1 rounded-md bg-blue-50 text-blue-800 border border-blue-200">
+                            f(x) = 2x - 4
+                        </span>
+                    </div>
+
+                    <p class="text-xs text-slate-500 mb-4">Forma general: <strong class="font-serif italic text-slate-700">f(x) = m · x + b</strong></p>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label for="inputM" class="block text-xs font-semibold text-slate-700 mb-1">
+                                Pendiente (<span class="italic font-serif">m</span>)
+                            </label>
+                            <input id="inputM" type="number" step="any" value="2"
+                                class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition">
+                        </div>
+                        <div>
+                            <label for="inputB_lin" class="block text-xs font-semibold text-slate-700 mb-1">
+                                Ordenada (<span class="italic font-serif">b</span>)
+                            </label>
+                            <input id="inputB_lin" type="number" step="any" value="-4"
+                                class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Tarjeta Función Cuadrática g(x) -->
+                <section class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3.5 h-3.5 rounded-full bg-[#DC143C] inline-block ring-4 ring-rose-100"></span>
+                            <h2 class="font-bold text-slate-900 text-sm uppercase tracking-wider">Función Cuadrática <span class="italic font-serif lowercase text-base">g(x)</span></h2>
+                        </div>
+                        <span id="previewQuadFormula" class="text-xs font-mono font-semibold px-2.5 py-1 rounded-md bg-rose-50 text-rose-800 border border-rose-200">
+                            g(x) = x² - 4x + 3
+                        </span>
+                    </div>
+
+                    <p class="text-xs text-slate-500 mb-4">Forma general: <strong class="font-serif italic text-slate-700">g(x) = a · x² + b · x + c</strong></p>
+
+                    <div class="grid grid-cols-3 gap-3">
+                        <div>
+                            <label for="inputA" class="block text-xs font-semibold text-slate-700 mb-1">
+                                Coef. cuadrático (<span class="italic font-serif">a</span>)
+                            </label>
+                            <input id="inputA" type="number" step="any" value="1"
+                                class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 focus:bg-white transition">
+                        </div>
+                        <div>
+                            <label for="inputB_quad" class="block text-xs font-semibold text-slate-700 mb-1">
+                                Coef. lineal (<span class="italic font-serif">b</span>)
+                            </label>
+                            <input id="inputB_quad" type="number" step="any" value="-4"
+                                class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 focus:bg-white transition">
+                        </div>
+                        <div>
+                            <label for="inputC" class="block text-xs font-semibold text-slate-700 mb-1">
+                                Término ind. (<span class="italic font-serif">c</span>)
+                            </label>
+                            <input id="inputC" type="number" step="any" value="3"
+                                class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 focus:bg-white transition">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Configuración de Ventana / Ejes -->
+                <section class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+                    <div class="flex items-center justify-between mb-3">
+                        <h2 class="font-bold text-slate-900 text-sm uppercase tracking-wider">Rango de los Ejes y Vista</h2>
+                        <label class="inline-flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer select-none">
+                            <input type="checkbox" id="chkAutoAdjust" class="rounded text-indigo-600 focus:ring-indigo-500">
+                            <span>Ajuste automático al editar</span>
+                        </label>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200/80">
+                            <span class="block text-xs font-bold text-slate-700 mb-2">Eje X (Horizontal)</span>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label for="xMin" class="block text-[11px] text-slate-500">Mínimo</label>
+                                    <input id="xMin" type="number" step="any" value="-1"
+                                        class="w-full px-2 py-1.5 text-xs bg-white border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label for="xMax" class="block text-[11px] text-slate-500">Máximo</label>
+                                    <input id="xMax" type="number" step="any" value="5"
+                                        class="w-full px-2 py-1.5 text-xs bg-white border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200/80">
+                            <span class="block text-xs font-bold text-slate-700 mb-2">Eje Y (Vertical)</span>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label for="yMin" class="block text-[11px] text-slate-500">Mínimo</label>
+                                    <input id="yMin" type="number" step="any" value="-5"
+                                        class="w-full px-2 py-1.5 text-xs bg-white border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label for="yMax" class="block text-[11px] text-slate-500">Máximo</label>
+                                    <input id="yMax" type="number" step="any" value="6"
+                                        class="w-full px-2 py-1.5 text-xs bg-white border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 text-xs text-slate-600">
+                        <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+                            <input type="checkbox" id="chkShowIntersections" class="rounded text-indigo-600 focus:ring-indigo-500">
+                            <span>Marcar intersecciones <span class="italic font-serif">f(x) = g(x)</span> en el gráfico</span>
+                        </label>
+                    </div>
+                </section>
+
+                <!-- Resumen Analítico de Puntos importantes -->
+                <section class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+                    <h2 class="font-bold text-slate-900 text-sm uppercase tracking-wider mb-3">Análisis de puntos clave</h2>
+                    <div id="analyticalSummary" class="space-y-3 text-xs">
+                        <!-- Rellenado dinámicamente por JS -->
+                    </div>
+                </section>
+            </div>
+
+            <!-- Panel Derecho: Lienzo del Gráfico (Estilo Matplotlib) -->
+            <div class="lg:col-span-7 xl:col-span-8 flex flex-col items-center">
+                <div class="w-full bg-white rounded-xl border border-slate-200 p-3 sm:p-6 canvas-shadow flex flex-col items-center">
+                    <!-- Contenedor responsivo que mantiene proporción similar a figura Matplotlib (680x610) -->
+                    <div class="w-full max-w-[720px] aspect-[680/610] relative">
+                        <canvas id="plotCanvas" class="w-full h-full block rounded cursor-crosshair"></canvas>
+                    </div>
+
+                    <!-- Barra inferior informativa con coordenadas del cursor -->
+                    <div class="w-full max-w-[720px] mt-3 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between text-xs text-slate-500 gap-2">
+                        <span class="flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                            Gráfico renderizado en alta definición (estilo Matplotlib)
+                        </span>
+                        <span id="cursorCoords" class="font-mono bg-slate-100 px-2.5 py-1 rounded text-slate-700">
+                            Pasa el cursor sobre el gráfico
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        (function () {
+            // Referencias del DOM
+            const canvas = document.getElementById('plotCanvas');
+            const ctx = canvas.getContext('2d');
+
+            const inputM = document.getElementById('inputM');
+            const inputB_lin = document.getElementById('inputB_lin');
+            const inputA = document.getElementById('inputA');
+            const inputB_quad = document.getElementById('inputB_quad');
+            const inputC = document.getElementById('inputC');
+
+            const xMinInput = document.getElementById('xMin');
+            const xMaxInput = document.getElementById('xMax');
+            const yMinInput = document.getElementById('yMin');
+            const yMaxInput = document.getElementById('yMax');
+
+            const chkAutoAdjust = document.getElementById('chkAutoAdjust');
+            const chkShowIntersections = document.getElementById('chkShowIntersections');
+
+            const btnResetOriginal = document.getElementById('btnResetOriginal');
+            const btnAutoRange = document.getElementById('btnAutoRange');
+            const btnDownload = document.getElementById('btnDownload');
+
+            const previewLinearFormula = document.getElementById('previewLinearFormula');
+            const previewQuadFormula = document.getElementById('previewQuadFormula');
+            const analyticalSummary = document.getElementById('analyticalSummary');
+            const cursorCoords = document.getElementById('cursorCoords');
+
+            // Formateo limpio de números (sin decimales innecesarios)
+            function fmtNum(val, maxDec = 2) {
+                if (!Number.isFinite(val)) return '0';
+                // Evitar -0
+                if (Math.abs(val) < 1e-9) return '0';
+                const rounded = Number(Math.round(val + 'e' + maxDec) + 'e-' + maxDec);
+                return String(rounded);
+            }
+
+            // Formatea número para el eje con signo menos matemático (−) como Matplotlib
+            function fmtTick(val) {
+                if (Math.abs(val) < 1e-9) return '0';
+                const str = fmtNum(val, 2);
+                return val < 0 ? '−' + str.slice(1) : str;
+            }
+
+            // Construye la cadena de texto de f(x) = mx + b
+            function formatLinearEquation(m, b, useMinusSymbol = false) {
+                const minus = useMinusSymbol ? '−' : '-';
+                let terms = [];
+
+                if (Math.abs(m) > 1e-9) {
+                    if (Math.abs(m - 1) < 1e-9) {
+                        terms.push('x');
+                    } else if (Math.abs(m + 1) < 1e-9) {
+                        terms.push(minus + 'x');
+                    } else {
+                        const mStr = m < 0 ? minus + fmtNum(Math.abs(m)) : fmtNum(m);
+                        terms.push(mStr + 'x');
+                    }
+                }
+
+                if (Math.abs(b) > 1e-9 || terms.length === 0) {
+                    const absB = fmtNum(Math.abs(b));
+                    if (terms.length === 0) {
+                        terms.push(b < 0 ? minus + absB : absB);
+                    } else {
+                        terms.push(b < 0 ? ` ${minus} ${absB}` : ` + ${absB}`);
+                    }
+                }
+
+                return terms.join('');
+            }
+
+            // Construye la cadena de texto de g(x) = ax² + bx + c
+            function formatQuadraticEquation(a, b, c, useMinusSymbol = false) {
+                const minus = useMinusSymbol ? '−' : '-';
+                let parts = [];
+
+                // Término cuadrático
+                if (Math.abs(a) > 1e-9) {
+                    if (Math.abs(a - 1) < 1e-9) {
+                        parts.push({ sign: '+', text: 'x²', first: 'x²' });
+                    } else if (Math.abs(a + 1) < 1e-9) {
+                        parts.push({ sign: minus, text: 'x²', first: minus + 'x²' });
+                    } else {
+                        const absA = fmtNum(Math.abs(a));
+                        parts.push({
+                            sign: a < 0 ? minus : '+',
+                            text: absA + 'x²',
+                            first: (a < 0 ? minus : '') + absA + 'x²'
+                        });
+                    }
+                }
+
+                // Término lineal
+                if (Math.abs(b) > 1e-9) {
+                    const absB = Math.abs(Math.abs(b) - 1) < 1e-9 ? '' : fmtNum(Math.abs(b));
+                    parts.push({
+                        sign: b < 0 ? minus : '+',
+                        text: absB + 'x',
+                        first: (b < 0 ? minus : '') + absB + 'x'
+                    });
+                }
+
+                // Término independiente
+                if (Math.abs(c) > 1e-9 || parts.length === 0) {
+                    const absC = fmtNum(Math.abs(c));
+                    parts.push({
+                        sign: c < 0 ? minus : '+',
+                        text: absC,
+                        first: (c < 0 ? minus : '') + absC
+                    });
+                }
+
+                return parts.map((p, idx) => idx === 0 ? p.first : ` ${p.sign} ${p.text}`).join('');
+            }
+
+            // Calcula todos los puntos notables de f(x) y g(x)
+            function computeNotablePoints(m, b_lin, a, b_quad, c) {
+                // 1. Función lineal f(x) = m*x + b_lin
+                const linearYIntercept = { x: 0, y: b_lin };
+                let linearRoot = null;
+                if (Math.abs(m) > 1e-9) {
+                    linearRoot = { x: -b_lin / m, y: 0 };
+                }
+
+                // 2. Función cuadrática g(x) = a*x² + b_quad*x + c
+                const quadYIntercept = { x: 0, y: c };
+                let vertex = null;
+                let quadRoots = [];
+                let discriminant = null;
+
+                if (Math.abs(a) > 1e-9) {
+                    const xv = -b_quad / (2 * a);
+                    const yv = a * xv * xv + b_quad * xv + c;
+                    vertex = { x: xv, y: yv };
+
+                    discriminant = b_quad * b_quad - 4 * a * c;
+                    if (Math.abs(discriminant) < 1e-9) {
+                        quadRoots.push({ x: xv, y: 0 });
+                    } else if (discriminant > 0) {
+                        const sqrtD = Math.sqrt(discriminant);
+                        const r1 = (-b_quad - sqrtD) / (2 * a);
+                        const r2 = (-b_quad + sqrtD) / (2 * a);
+                        quadRoots.push({ x: Math.min(r1, r2), y: 0 });
+                        quadRoots.push({ x: Math.max(r1, r2), y: 0 });
+                    }
+                } else if (Math.abs(b_quad) > 1e-9) {
+                    // Caso degenerado: a = 0, g(x) es lineal
+                    quadRoots.push({ x: -c / b_quad, y: 0 });
+                }
+
+                // 3. Intersecciones f(x) = g(x) => a*x² + (b_quad - m)*x + (c - b_lin) = 0
+                let intersections = [];
+                const A = a;
+                const B = b_quad - m;
+                const C = c - b_lin;
+
+                if (Math.abs(A) > 1e-9) {
+                    const D = B * B - 4 * A * C;
+                    if (Math.abs(D) < 1e-9) {
+                        const xi = -B / (2 * A);
+                        intersections.push({ x: xi, y: m * xi + b_lin });
+                    } else if (D > 0) {
+                        const sqrtD = Math.sqrt(D);
+                        const x1 = (-B - sqrtD) / (2 * A);
+                        const x2 = (-B + sqrtD) / (2 * A);
+                        const sortedX = [x1, x2].sort((p, q) => p - q);
+                        intersections.push({ x: sortedX[0], y: m * sortedX[0] + b_lin });
+                        intersections.push({ x: sortedX[1], y: m * sortedX[1] + b_lin });
+                    }
+                } else if (Math.abs(B) > 1e-9) {
+                    const xi = -C / B;
+                    intersections.push({ x: xi, y: m * xi + b_lin });
+                }
+
+                return {
+                    linearYIntercept,
+                    linearRoot,
+                    quadYIntercept,
+                    vertex,
+                    quadRoots,
+                    discriminant,
+                    intersections
+                };
+            }
+
+            // Calcula un paso de graduación (tick step) agradable al estilo Matplotlib
+            function getNiceTickStep(range, targetTicks = 6) {
+                if (range <= 0 || !Number.isFinite(range)) return 1;
+                const roughStep = range / targetTicks;
+                const mag = Math.pow(10, Math.floor(Math.log10(roughStep)));
+                const residual = roughStep / mag;
+                if (residual > 5) return 10 * mag;
+                if (residual > 2) return 5 * mag;
+                if (residual > 1) return 2 * mag;
+                return mag;
+            }
+
+            // Auto-ajusta los límites X e Y para englobar todos los puntos notables con margen limpio
+            function autoCalculateBounds() {
+                const m = parseFloat(inputM.value) || 0;
+                const b_lin = parseFloat(inputB_lin.value) || 0;
+                const a = parseFloat(inputA.value) || 0;
+                const b_quad = parseFloat(inputB_quad.value) || 0;
+                const c = parseFloat(inputC.value) || 0;
+
+                // Si son exactamente los valores del ejemplo por defecto, usar el rango exacto de la imagen (-1 a 5, -5 a 6)
+                if (m === 2 && b_lin === -4 && a === 1 && b_quad === -4 && c === 3) {
+                    xMinInput.value = -1;
+                    xMaxInput.value = 5;
+                    yMinInput.value = -5;
+                    yMaxInput.value = 6;
+                    return;
+                }
+
+                const pts = computeNotablePoints(m, b_lin, a, b_quad, c);
+                const xVals = [0];
+                const yVals = [0];
+
+                const collect = (pt) => {
+                    if (pt && Number.isFinite(pt.x) && Number.isFinite(pt.y)) {
+                        xVals.push(pt.x);
+                        yVals.push(pt.y);
+                    }
+                };
+
+                collect(pts.linearYIntercept);
+                collect(pts.linearRoot);
+                collect(pts.quadYIntercept);
+                collect(pts.vertex);
+                pts.quadRoots.forEach(collect);
+                pts.intersections.forEach(collect);
+
+                let minX = Math.min(...xVals);
+                let maxX = Math.max(...xVals);
+                let minY = Math.min(...yVals);
+                let maxY = Math.max(...yVals);
+
+                const spanX = Math.max(maxX - minX, 4);
+                const spanY = Math.max(maxY - minY, 6);
+
+                minX = Math.floor(minX - spanX * 0.25);
+                maxX = Math.ceil(maxX + spanX * 0.25);
+                minY = Math.floor(minY - spanY * 0.2);
+                maxY = Math.ceil(maxY + spanY * 0.25);
+
+                xMinInput.value = minX;
+                xMaxInput.value = maxX;
+                yMinInput.value = minY;
+                yMaxInput.value = maxY;
+            }
+
+            // Estado del último renderizado para el cálculo de coordenadas del cursor
+            let lastPlotMetrics = null;
+
+            function renderPlot() {
+                const m = parseFloat(inputM.value) || 0;
+                const b_lin = parseFloat(inputB_lin.value) || 0;
+                const a = parseFloat(inputA.value) || 0;
+                const b_quad = parseFloat(inputB_quad.value) || 0;
+                const c = parseFloat(inputC.value) || 0;
+
+                let xMin = parseFloat(xMinInput.value);
+                let xMax = parseFloat(xMaxInput.value);
+                let yMin = parseFloat(yMinInput.value);
+                let yMax = parseFloat(yMaxInput.value);
+
+                // Validación defensiva de rangos
+                if (!Number.isFinite(xMin) || !Number.isFinite(xMax) || xMin >= xMax) {
+                    xMin = -1; xMax = 5;
+                }
+                if (!Number.isFinite(yMin) || !Number.isFinite(yMax) || yMin >= yMax) {
+                    yMin = -5; yMax = 6;
+                }
+
+                // Actualizar insignias de vista previa
+                previewLinearFormula.textContent = `f(x) = ${formatLinearEquation(m, b_lin, false)}`;
+                previewQuadFormula.textContent = `g(x) = ${formatQuadraticEquation(a, b_quad, c, false)}`;
+
+                const notable = computeNotablePoints(m, b_lin, a, b_quad, c);
+                updateAnalyticalPanel(m, b_lin, a, b_quad, c, notable);
+
+                // Configurar resolución Retina / HiDPI del Canvas
+                const rect = canvas.getBoundingClientRect();
+                const dpr = window.devicePixelRatio || 1;
+                const width = rect.width || 680;
+                const height = rect.height || 610;
+
+                if (canvas.width !== Math.round(width * dpr) || canvas.height !== Math.round(height * dpr)) {
+                    canvas.width = Math.round(width * dpr);
+                    canvas.height = Math.round(height * dpr);
+                }
+
+                ctx.save();
+                ctx.scale(dpr, dpr);
+
+                // Factor de escala tipográfica proporcional al tamaño del lienzo
+                const scaleFactor = Math.min(width / 680, height / 610);
+                const fontBase = (size) => `${Math.max(10, Math.round(size * scaleFactor))}px 'Inter', -apple-system, BlinkMacSystemFont, sans-serif`;
+                const fontItalic = (size) => `italic ${Math.max(10, Math.round(size * scaleFactor))}px 'Inter', -apple-system, BlinkMacSystemFont, sans-serif`;
+
+                // 1. Fondo blanco puro (importa también al descargar PNG)
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(0, 0, width, height);
+
+                // Márgenes del área de trazado iguales al layout de Matplotlib
+                const padLeft = Math.round(64 * scaleFactor);
+                const padRight = Math.round(22 * scaleFactor);
+                const padTop = Math.round(42 * scaleFactor);
+                const padBottom = Math.round(54 * scaleFactor);
+
+                const plotW = width - padLeft - padRight;
+                const plotH = height - padTop - padBottom;
+
+                // Funciones de conversión entre coordenadas matemáticas y píxeles
+                const toPxX = (x) => padLeft + ((x - xMin) / (xMax - xMin)) * plotW;
+                const toPxY = (y) => padTop + plotH - ((y - yMin) / (yMax - yMin)) * plotH;
+                const toMathX = (px) => xMin + ((px - padLeft) / plotW) * (xMax - xMin);
+                const toMathY = (py) => yMin + ((padTop + plotH - py) / plotH) * (yMax - yMin);
+
+                lastPlotMetrics = { padLeft, padRight, padTop, padBottom, plotW, plotH, toMathX, toMathY, m, b_lin, a, b_quad, c };
+
+                // 2. Calcular marcas de graduación (ticks)
+                // En la imagen de referencia: X va de -1 a 5 de 1 en 1; Y va de -5 a 6 con marcas pares (-4, -2, 0, 2, 4, 6)
+                const xRange = xMax - xMin;
+                const yRange = yMax - yMin;
+                const xStep = (xMin === -1 && xMax === 5) ? 1 : getNiceTickStep(xRange, 6);
+                const yStep = (yMin === -5 && yMax === 6) ? 2 : getNiceTickStep(yRange, 6);
+
+                const xTicks = [];
+                const firstXTick = Math.ceil((xMin - 1e-9) / xStep) * xStep;
+                for (let xv = firstXTick; xv <= xMax + 1e-9; xv += xStep) {
+                    xTicks.push(Number(xv.toFixed(8)));
+                }
+
+                const yTicks = [];
+                const firstYTick = Math.ceil((yMin - 1e-9) / yStep) * yStep;
+                for (let yv = firstYTick; yv <= yMax + 1e-9; yv += yStep) {
+                    yTicks.push(Number(yv.toFixed(8)));
+                }
+
+                // 3. Dibujar cuadrícula (Grid) punteada gris claro (#c8c8c8)
+                ctx.save();
+                ctx.beginPath();
+                ctx.strokeStyle = '#c8c8c8';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([4 * scaleFactor, 3 * scaleFactor]);
+
+                xTicks.forEach(xv => {
+                    const px = toPxX(xv);
+                    if (px >= padLeft - 0.5 && px <= padLeft + plotW + 0.5) {
+                        ctx.moveTo(px, padTop);
+                        ctx.lineTo(px, padTop + plotH);
+                    }
+                });
+
+                yTicks.forEach(yv => {
+                    const py = toPxY(yv);
+                    if (py >= padTop - 0.5 && py <= padTop + plotH + 0.5) {
+                        ctx.moveTo(padLeft, py);
+                        ctx.lineTo(padLeft + plotW, py);
+                    }
+                });
+                ctx.stroke();
+                ctx.restore();
+
+                // 4. Recortar (Clip) al interior del marco para dibujar ejes X=0, Y=0, curvas y puntos
+                ctx.save();
+                ctx.beginPath();
+                ctx.rect(padLeft, padTop, plotW, plotH);
+                ctx.clip();
+
+                // Ejes principales X = 0 e Y = 0 en negro sólido (#000000)
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = 1.4 * scaleFactor;
+                ctx.beginPath();
+                if (xMin <= 0 && xMax >= 0) {
+                    const zeroX = toPxX(0);
+                    ctx.moveTo(zeroX, padTop);
+                    ctx.lineTo(zeroX, padTop + plotH);
+                }
+                if (yMin <= 0 && yMax >= 0) {
+                    const zeroY = toPxY(0);
+                    ctx.moveTo(padLeft, zeroY);
+                    ctx.lineTo(padLeft + plotW, zeroY);
+                }
+                ctx.stroke();
+
+                // 5. Trazar función lineal f(x) = m*x + b_lin en azul (#0000FF)
+                ctx.save();
+                ctx.strokeStyle = '#0000FF';
+                ctx.lineWidth = 2.2 * scaleFactor;
+                ctx.lineJoin = 'round';
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                const yAtXMin = m * xMin + b_lin;
+                const yAtXMax = m * xMax + b_lin;
+                ctx.moveTo(toPxX(xMin), toPxY(yAtXMin));
+                ctx.lineTo(toPxX(xMax), toPxY(yAtXMax));
+                ctx.stroke();
+                ctx.restore();
+
+                // 6. Trazar función cuadrática g(x) = a*x² + b*x + c en rojo carmesí (#DC143C)
+                ctx.save();
+                ctx.strokeStyle = '#DC143C';
+                ctx.lineWidth = 2.2 * scaleFactor;
+                ctx.lineJoin = 'round';
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                const segments = 500;
+                for (let i = 0; i <= segments; i++) {
+                    const xv = xMin + (i / segments) * (xMax - xMin);
+                    const yv = a * xv * xv + b_quad * xv + c;
+                    const px = toPxX(xv);
+                    const py = toPxY(yv);
+                    if (i === 0) ctx.moveTo(px, py);
+                    else ctx.lineTo(px, py);
+                }
+                ctx.stroke();
+                ctx.restore();
+
+                // 7. Dibujar puntos notables y etiquetas dentro del área del gráfico
+                const pointRadius = 4.6 * scaleFactor;
+                const placedLabels = []; // Para evitar colisiones de texto si dos etiquetas están muy juntas
+
+                function drawPointCircle(x, y, color) {
+                    if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+                    const px = toPxX(x);
+                    const py = toPxY(y);
+                    // Dibujar sólo si está cerca o dentro de la vista
+                    if (px < padLeft - 20 || px > padLeft + plotW + 20 || py < padTop - 20 || py > padTop + plotH + 20) return;
+                    ctx.save();
+                    ctx.fillStyle = color;
+                    ctx.beginPath();
+                    ctx.arc(px, py, pointRadius, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+
+                function drawPointLabel(x, y, text, color, offsetPxX, offsetPxY, align = 'left', baseline = 'alphabetic') {
+                    if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+                    const px = toPxX(x);
+                    const py = toPxY(y);
+                    if (px < padLeft - 5 || px > padLeft + plotW + 5 || py < padTop - 5 || py > padTop + plotH + 5) return;
+
+                    ctx.save();
+                    ctx.font = fontBase(12.5);
+                    ctx.fillStyle = color;
+                    ctx.textAlign = align;
+                    ctx.textBaseline = baseline;
+
+                    let tx = px + offsetPxX * scaleFactor;
+                    let ty = py + offsetPxY * scaleFactor;
+
+                    const metrics = ctx.measureText(text);
+                    const w = metrics.width;
+                    const h = 14 * scaleFactor;
+
+                    // Ajustar si choca con otra etiqueta previamente colocada
+                    let boxX = align === 'right' ? tx - w : (align === 'center' ? tx - w / 2 : tx);
+                    let boxY = ty - h;
+
+                    for (let attempt = 0; attempt < 4; attempt++) {
+                        const collision = placedLabels.some(b =>
+                            boxX < b.x + b.w + 4 &&
+                            boxX + w + 4 > b.x &&
+                            boxY < b.y + b.h + 2 &&
+                            boxY + h + 2 > b.y
+                        );
+                        if (!collision) break;
+                        ty += (offsetPxY >= 0 ? 15 : -15) * scaleFactor;
+                        boxY = ty - h;
+                    }
+
+                    placedLabels.push({ x: boxX, y: boxY, w, h });
+                    ctx.fillText(text, tx, ty);
+                    ctx.restore();
+                }
+
+                // Puntos y etiquetas de g(x) (Rojo Carmesí #DC143C)
+                // Ordenada de g(x): en la imagen "Ordenada (0,3)" arriba a la derecha del punto (0,3)
+                drawPointCircle(notable.quadYIntercept.x, notable.quadYIntercept.y, '#DC143C');
+                drawPointLabel(
+                    notable.quadYIntercept.x,
+                    notable.quadYIntercept.y,
+                    `Ordenada (0,${fmtNum(notable.quadYIntercept.y)})`,
+                    '#DC143C',
+                    9, -10, 'left', 'alphabetic'
+                );
+
+                // Vértice de g(x): en la imagen "Vertice (2,-1)" a la derecha y ligeramente abajo del punto (2,-1)
+                if (notable.vertex) {
+                    drawPointCircle(notable.vertex.x, notable.vertex.y, '#DC143C');
+                    drawPointLabel(
+                        notable.vertex.x,
+                        notable.vertex.y,
+                        `Vertice (${fmtNum(notable.vertex.x)},${fmtNum(notable.vertex.y)})`,
+                        '#DC143C',
+                        9, 10, 'left', 'alphabetic'
+                    );
+                }
+
+                // Raíces de g(x): en la imagen tienen etiqueta "1" arriba a la izquierda de (1,0) y "3" arriba a la derecha de (3,0)
+                notable.quadRoots.forEach((root, idx) => {
+                    drawPointCircle(root.x, root.y, '#DC143C');
+                    // Si la raíz cuadrática coincide con la raíz lineal (como en x=2 si m=2,b=-4 y raíz=2), la etiqueta se desplaza suavemente
+                    const isLeftRoot = notable.quadRoots.length === 2 && idx === 0;
+                    const offsetX = isLeftRoot ? -11 : 11;
+                    const align = isLeftRoot ? 'right' : 'left';
+                    drawPointLabel(
+                        root.x,
+                        root.y,
+                        `${fmtNum(root.x)}`,
+                        '#DC143C',
+                        offsetX, -15, align, 'alphabetic'
+                    );
+                });
+
+                // Puntos y etiquetas de f(x) (Azul #0000FF)
+                // Ordenada de f(x): en la imagen "Ordenada (0,-4)" a la derecha y ligeramente abajo del punto (0,-4)
+                drawPointCircle(notable.linearYIntercept.x, notable.linearYIntercept.y, '#0000FF');
+                drawPointLabel(
+                    notable.linearYIntercept.x,
+                    notable.linearYIntercept.y,
+                    `Ordenada (0,${fmtNum(notable.linearYIntercept.y)})`,
+                    '#0000FF',
+                    9, 14, 'left', 'alphabetic'
+                );
+
+                // Raíz de f(x): en la imagen "Raiz (2,0)" arriba a la derecha del punto (2,0)
+                if (notable.linearRoot) {
+                    drawPointCircle(notable.linearRoot.x, notable.linearRoot.y, '#0000FF');
+                    drawPointLabel(
+                        notable.linearRoot.x,
+                        notable.linearRoot.y,
+                        `Raiz (${fmtNum(notable.linearRoot.x)},0)`,
+                        '#0000FF',
+                        9, -10, 'left', 'alphabetic'
+                    );
+                }
+
+                // Intersecciones opcionales f(x) = g(x) si el usuario activa la casilla
+                if (chkShowIntersections.checked && notable.intersections.length > 0) {
+                    notable.intersections.forEach(pt => {
+                        drawPointCircle(pt.x, pt.y, '#16a34a');
+                        drawPointLabel(
+                            pt.x,
+                            pt.y,
+                            `Intersec. (${fmtNum(pt.x)},${fmtNum(pt.y)})`,
+                            '#15803d',
+                            9, -10, 'left', 'alphabetic'
+                        );
+                    });
+                }
+
+                ctx.restore(); // Fin del área recortada (clip)
+
+                // 8. Marco exterior negro cerrado (Spines de Matplotlib)
+                ctx.save();
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = 1.1 * scaleFactor;
+                ctx.strokeRect(padLeft, padTop, plotW, plotH);
+
+                // 9. Marcas de graduación (ticks exteriores) y numeración en los ejes X e Y
+                const tickLen = 4.5 * scaleFactor;
+                ctx.fillStyle = '#000000';
+                ctx.font = fontBase(13);
+
+                // Ticks Eje X
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+                xTicks.forEach(xv => {
+                    const px = toPxX(xv);
+                    if (px >= padLeft - 0.5 && px <= padLeft + plotW + 0.5) {
+                        ctx.beginPath();
+                        ctx.moveTo(px, padTop + plotH);
+                        ctx.lineTo(px, padTop + plotH + tickLen);
+                        ctx.stroke();
+                        ctx.fillText(fmtTick(xv), px, padTop + plotH + 8 * scaleFactor);
+                    }
+                });
+
+                // Ticks Eje Y
+                ctx.textAlign = 'right';
+                ctx.textBaseline = 'middle';
+                yTicks.forEach(yv => {
+                    const py = toPxY(yv);
+                    if (py >= padTop - 0.5 && py <= padTop + plotH + 0.5) {
+                        ctx.beginPath();
+                        ctx.moveTo(padLeft, py);
+                        ctx.lineTo(padLeft - tickLen, py);
+                        ctx.stroke();
+                        ctx.fillText(fmtTick(yv), padLeft - 8 * scaleFactor, py);
+                    }
+                });
+
+                // 10. Título superior y etiquetas de los ejes ("Representación de f(x) y g(x)", "Eje X", "Eje Y")
+                ctx.fillStyle = '#000000';
+                ctx.font = fontBase(16);
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+                ctx.fillText('Representación de f(x) y g(x)', padLeft + plotW / 2, padTop - 10 * scaleFactor);
+
+                // Etiqueta "Eje X"
+                ctx.font = fontBase(13.5);
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+                ctx.fillText('Eje X', padLeft + plotW / 2, height - 8 * scaleFactor);
+
+                // Etiqueta "Eje Y" (rotada 90 grados a la izquierda)
+                ctx.save();
+                ctx.translate(18 * scaleFactor, padTop + plotH / 2);
+                ctx.rotate(-Math.PI / 2);
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+                ctx.fillText('Eje Y', 0, 0);
+                ctx.restore();
+
+                // 11. Leyenda (Legend) en la esquina superior derecha estilo Matplotlib
+                drawMatplotlibLegend(ctx, padLeft, padTop, plotW, scaleFactor, m, b_lin, a, b_quad, c, fontBase, fontItalic);
+
+                ctx.restore();
+            }
+
+            // Dibuja la caja de leyenda con tipografía matemática fiel a Matplotlib
+            function drawMatplotlibLegend(ctx, padLeft, padTop, plotW, scaleFactor, m, b_lin, a, b_quad, c, fontBase, fontItalic) {
+                ctx.save();
+
+                const eqLinText = `f(x) = ${formatLinearEquation(m, b_lin, true)}`;
+                const eqQuadText = `g(x) = ${formatQuadraticEquation(a, b_quad, c, true)}`;
+
+                ctx.font = fontItalic(13);
+                const w1 = ctx.measureText(eqLinText).width;
+                const w2 = ctx.measureText(eqQuadText).width;
+                const maxTextW = Math.max(w1, w2);
+
+                const lineSampleW = 30 * scaleFactor;
+                const gapBetweenLineAndText = 10 * scaleFactor;
+                const boxPadX = 11 * scaleFactor;
+                const boxPadY = 9 * scaleFactor;
+                const rowHeight = 22 * scaleFactor;
+
+                const legendW = boxPadX * 2 + lineSampleW + gapBetweenLineAndText + maxTextW + 6 * scaleFactor;
+                const legendH = boxPadY * 2 + rowHeight * 2 - 4 * scaleFactor;
+
+                const legendX = padLeft + plotW - legendW - 10 * scaleFactor;
+                const legendY = padTop + 10 * scaleFactor;
+                const radius = 4 * scaleFactor;
+
+                // Fondo blanco semitransparente con borde gris claro redondeado
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.88)';
+                ctx.strokeStyle = '#cccccc';
+                ctx.lineWidth = 1 * scaleFactor;
+
+                ctx.beginPath();
+                ctx.roundRect(legendX, legendY, legendW, legendH, radius);
+                ctx.fill();
+                ctx.stroke();
+
+                // Fila 1: f(x) en azul
+                const row1Y = legendY + boxPadY + 7 * scaleFactor;
+                ctx.strokeStyle = '#0000FF';
+                ctx.lineWidth = 2.2 * scaleFactor;
+                ctx.beginPath();
+                ctx.moveTo(legendX + boxPadX, row1Y);
+                ctx.lineTo(legendX + boxPadX + lineSampleW, row1Y);
+                ctx.stroke();
+
+                drawMathFormattedEquation(
+                    ctx,
+                    'f',
+                    formatLinearEquation(m, b_lin, true),
+                    legendX + boxPadX + lineSampleW + gapBetweenLineAndText,
+                    row1Y,
+                    scaleFactor,
+                    fontBase,
+                    fontItalic
+                );
+
+                // Fila 2: g(x) en rojo carmesí
+                const row2Y = row1Y + rowHeight;
+                ctx.strokeStyle = '#DC143C';
+                ctx.lineWidth = 2.2 * scaleFactor;
+                ctx.beginPath();
+                ctx.moveTo(legendX + boxPadX, row2Y);
+                ctx.lineTo(legendX + boxPadX + lineSampleW, row2Y);
+                ctx.stroke();
+
+                drawMathFormattedEquation(
+                    ctx,
+                    'g',
+                    formatQuadraticEquation(a, b_quad, c, true),
+                    legendX + boxPadX + lineSampleW + gapBetweenLineAndText,
+                    row2Y,
+                    scaleFactor,
+                    fontBase,
+                    fontItalic
+                );
+
+                ctx.restore();
+            }
+
+            // Renderiza ecuaciones con variables en cursiva y números/operadores en estilo normal como LaTeX/Matplotlib
+            function drawMathFormattedEquation(ctx, fnName, rhsString, startX, centerY, scaleFactor, fontBase, fontItalic) {
+                ctx.save();
+                ctx.fillStyle = '#000000';
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'middle';
+
+                let cursorX = startX;
+
+                const drawSegment = (str, italic = false, isSuperscript = false) => {
+                    if (!str) return;
+                    if (isSuperscript) {
+                        ctx.font = fontBase(9.5);
+                        ctx.fillText(str, cursorX, centerY - 5 * scaleFactor);
+                        cursorX += ctx.measureText(str).width + 0.5 * scaleFactor;
+                    } else {
+                        ctx.font = italic ? fontItalic(13) : fontBase(13);
+                        ctx.fillText(str, cursorX, centerY);
+                        cursorX += ctx.measureText(str).width;
+                    }
+                };
+
+                // "f(x) = " o "g(x) = "
+                drawSegment(fnName, true);
+                drawSegment('(', false);
+                drawSegment('x', true);
+                drawSegment(') = ', false);
+
+                // Tokenizar el lado derecho para poner 'x' en cursiva y '²' como superíndice limpio
+                for (let i = 0; i < rhsString.length; i++) {
+                    const ch = rhsString[i];
+                    if (ch === 'x') {
+                        drawSegment('x', true);
+                    } else if (ch === '²') {
+                        drawSegment('2', false, true);
+                    } else {
+                        drawSegment(ch, false);
+                    }
+                }
+
+                ctx.restore();
+            }
+
+            // Actualiza el resumen analítico en el panel izquierdo
+            function updateAnalyticalPanel(m, b_lin, a, b_quad, c, notable) {
+                const linRootText = notable.linearRoot
+                    ? `(${fmtNum(notable.linearRoot.x)}, 0)`
+                    : (Math.abs(b_lin) < 1e-9 ? 'Infinitas (recta sobre eje X)' : 'No tiene (recta horizontal)');
+
+                let quadRootsText = '';
+                if (notable.quadRoots.length === 2) {
+                    quadRootsText = `x₁ = ${fmtNum(notable.quadRoots[0].x)}  |  x₂ = ${fmtNum(notable.quadRoots[1].x)}`;
+                } else if (notable.quadRoots.length === 1) {
+                    quadRootsText = `Raíz doble: x = ${fmtNum(notable.quadRoots[0].x)}`;
+                } else {
+                    quadRootsText = 'Sin raíces reales (Δ < 0)';
+                }
+
+                const vertexText = notable.vertex
+                    ? `(${fmtNum(notable.vertex.x)}, ${fmtNum(notable.vertex.y)})`
+                    : 'No aplica (a = 0)';
+
+                let intersecText = 'No se intersecan en ℝ';
+                if (notable.intersections.length > 0) {
+                    intersecText = notable.intersections
+                        .map(pt => `(${fmtNum(pt.x)}, ${fmtNum(pt.y)})`)
+                        .join(' y ');
+                }
+
+                analyticalSummary.innerHTML = `
+                    <div class="p-3 rounded-lg bg-blue-50/70 border border-blue-100">
+                        <div class="font-bold text-blue-900 mb-1 flex items-center justify-between">
+                            <span>Función Lineal f(x)</span>
+                            <span class="font-mono text-[11px]">m = ${fmtNum(m)}, b = ${fmtNum(b_lin)}</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-slate-700 mt-1.5">
+                            <div><span class="text-slate-500">Ordenada:</span> <strong>(0, ${fmtNum(notable.linearYIntercept.y)})</strong></div>
+                            <div><span class="text-slate-500">Raíz:</span> <strong>${linRootText}</strong></div>
+                        </div>
+                    </div>
+
+                    <div class="p-3 rounded-lg bg-rose-50/70 border border-rose-100">
+                        <div class="font-bold text-rose-900 mb-1 flex items-center justify-between">
+                            <span>Función Cuadrática g(x)</span>
+                            <span class="font-mono text-[11px]">Δ = ${notable.discriminant !== null ? fmtNum(notable.discriminant) : 'N/A'}</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-slate-700 mt-1.5">
+                            <div><span class="text-slate-500">Ordenada:</span> <strong>(0, ${fmtNum(notable.quadYIntercept.y)})</strong></div>
+                            <div><span class="text-slate-500">Vértice:</span> <strong>${vertexText}</strong></div>
+                            <div class="col-span-2"><span class="text-slate-500">Raíces reales:</span> <strong>${quadRootsText}</strong></div>
+                        </div>
+                    </div>
+
+                    <div class="p-3 rounded-lg bg-slate-50 border border-slate-200/80 flex items-center justify-between">
+                        <span class="text-slate-600 font-medium">Intersección <span class="italic font-serif">f(x) = g(x)</span>:</span>
+                        <strong class="text-slate-900 font-mono">${intersecText}</strong>
+                    </div>
+                `;
+            }
+
+            // Eventos de entrada en coeficientes
+            const coeffInputs = [inputM, inputB_lin, inputA, inputB_quad, inputC];
+            coeffInputs.forEach(input => {
+                input.addEventListener('input', () => {
+                    if (chkAutoAdjust.checked) {
+                        autoCalculateBounds();
+                    }
+                    renderPlot();
+                });
+            });
+
+            // Eventos de entrada en límites de los ejes
+            const axisInputs = [xMinInput, xMaxInput, yMinInput, yMaxInput];
+            axisInputs.forEach(input => {
+                input.addEventListener('input', () => {
+                    renderPlot();
+                });
+            });
+
+            chkShowIntersections.addEventListener('change', renderPlot);
+
+            // Botón: Restaurar Ejemplo Original de la imagen
+            btnResetOriginal.addEventListener('click', () => {
+                inputM.value = 2;
+                inputB_lin.value = -4;
+                inputA.value = 1;
+                inputB_quad.value = -4;
+                inputC.value = 3;
+                xMinInput.value = -1;
+                xMaxInput.value = 5;
+                yMinInput.value = -5;
+                yMaxInput.value = 6;
+                renderPlot();
+            });
+
+            // Botón: Auto-ajustar Ejes
+            btnAutoRange.addEventListener('click', () => {
+                autoCalculateBounds();
+                renderPlot();
+            });
+
+            // Botón: Descargar gráfico como PNG
+            btnDownload.addEventListener('click', () => {
+                renderPlot();
+                const link = document.createElement('a');
+                link.download = 'representacion_fx_gx.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+
+            // Seguimiento del cursor sobre el gráfico para mostrar coordenadas exactas
+            canvas.addEventListener('mousemove', (e) => {
+                if (!lastPlotMetrics) return;
+                const rect = canvas.getBoundingClientRect();
+                const px = e.clientX - rect.left;
+                const py = e.clientY - rect.top;
+
+                const { padLeft, padTop, plotW, plotH, toMathX, toMathY, m, b_lin, a, b_quad, c } = lastPlotMetrics;
+                if (px >= padLeft && px <= padLeft + plotW && py >= padTop && py <= padTop + plotH) {
+                    const mx = toMathX(px);
+                    const my = toMathY(py);
+                    const fxVal = m * mx + b_lin;
+                    const gxVal = a * mx * mx + b_quad * mx + c;
+                    cursorCoords.textContent = `x: ${mx.toFixed(2)}, y: ${my.toFixed(2)}  |  f(x)=${fxVal.toFixed(2)}, g(x)=${gxVal.toFixed(2)}`;
+                } else {
+                    cursorCoords.textContent = 'Pasa el cursor sobre el gráfico';
+                }
+            });
+
+            canvas.addEventListener('mouseleave', () => {
+                cursorCoords.textContent = 'Pasa el cursor sobre el gráfico';
+            });
+
+            // Redibujar al cambiar el tamaño de la ventana
+            window.addEventListener('resize', renderPlot);
+
+            // Renderizado inicial al cargar la página
+            window.addEventListener('DOMContentLoaded', renderPlot);
+            renderPlot();
+        })();
+    </script>
+</body>
+</html>
